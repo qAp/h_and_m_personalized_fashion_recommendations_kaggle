@@ -69,3 +69,13 @@ class HM(pl.LightningDataModule):
 
     def val_dataloader(self):
         pass
+
+
+def prepare_data():
+    parser = argparse.ArgumentParser()
+
+    HM.add_argparse_args(parser)
+    args = parser.parse_args([])
+
+    data = HM(args)
+    data.prepare_data()
