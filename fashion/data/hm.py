@@ -178,7 +178,7 @@ class HM(pl.LightningDataModule):
                                   week_hist_max=self.week_hist_max)
 
     def config(self):
-        return {'num_article_ids': len(le_article.classes_)}
+        return {'num_article_ids': len(self.le_article.classes_)}
 
     def train_dataloader(self):
         return DataLoader(
