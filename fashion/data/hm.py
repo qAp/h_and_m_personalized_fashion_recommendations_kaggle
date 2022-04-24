@@ -123,7 +123,7 @@ class HM(pl.LightningDataModule):
         hist_df = (
             df[is_hist_week]
             .groupby('customer_id')
-            .transform({'article_id': list, 'week': list})
+            .agg({'article_id': list, 'week': list})
             .reset_index()
             .rename(columns={'week': 'week_history'})
         )
@@ -131,7 +131,7 @@ class HM(pl.LightningDataModule):
         target_df = (
             df[is_target_week]
             .groupby('customer_id')
-            .transform({'article_id': list, 'week': list})
+            .agg({'article_id': list, 'week': list})
             .reset_index()
             .rename(columns={'article_id': 'target'})
         )
