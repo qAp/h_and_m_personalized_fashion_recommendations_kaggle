@@ -2,19 +2,29 @@
 import torch, torch.nn as nn, torch.nn.functional as F
 
 
+EMBEDDING_DIM = 512
+
 class HMModel(nn.Module):
-    def __init__(self, article_shape):
-        super(HMModel, self).__init__()
+    def __init__(self, data_config, args=None):
+        super().__init__()
+
+        self.args = vars(args) if args is not None else {}
+        self.embedding_dim = self.args.get('embedding_dim', EMBEDDING_DIM)
 
         self.article_emb = nn.Embedding(
-            article_shape[0], embedding_dim=article_shape[1])
+            data_config['num_article_ids'], embedding_dim=self.embedding_dim)
 
         self.article_likelihood = nn.Parameter(
-            torch.zeros(article_shape[0]), requires_grad=True)
+            torch.zeros(data_config['num_article_ids']), requires_grad=True)
         self.top = nn.Sequential(nn.Conv1d(3, 32, kernel_size=1), nn.LeakyReLU(),
                                  nn.Conv1d(
                                      32, 8, kernel_size=1), nn.LeakyReLU(),
                                  nn.Conv1d(8, 1, kernel_size=1))
+
+    @staticmethod
+    def add_argparse_args(parser):
+        _add = parser.add_argument
+        _add('--embedding_dim', type=int, default=EMBEDDING_DIM)
 
     def forward(self, inputs):
         article_hist, week_hist = inputs[0], inputs[1]

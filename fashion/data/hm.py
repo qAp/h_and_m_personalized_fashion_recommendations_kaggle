@@ -156,6 +156,8 @@ class HM(pl.LightningDataModule):
         df = pd.read_parquet(meta_data_path)
         le_article = joblib.load(label_encoder_path)
 
+        self.le_article = le_article
+
         if self.val_weeks:
             val_df = pd.concat([
                 self.create_dataset(df, w) for w in self.val_weeks
@@ -174,6 +176,9 @@ class HM(pl.LightningDataModule):
                                   self.seq_len, 
                                   num_article_ids=len(le_article.classes_),
                                   week_hist_max=self.week_hist_max)
+
+    def data_config(self):
+        return {'num_article_ids': len(le_article.classes_)}
 
     def train_dataloader(self):
         return DataLoader(
