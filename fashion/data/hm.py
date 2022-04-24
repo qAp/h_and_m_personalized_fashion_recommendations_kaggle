@@ -141,10 +141,12 @@ class HM(pl.LightningDataModule):
         target_df = (
             df[is_target_week]
             .groupby('customer_id')
-            .agg({'article_id': list, 'week': list})
+            .agg({'article_id': list})
             .reset_index()
             .rename(columns={'article_id': 'target'})
         )
+        target_df['week'] = week
+        
         return target_df.merge(hist_df, on='customer_id', how='left')
 
     def setup(self):
