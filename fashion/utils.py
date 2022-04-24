@@ -28,9 +28,9 @@ def setup_parser():
     data_group = parser.add_argument_group('Data Args')
     data_class.add_argparse_args(data_group)
 
-    # model_class = import_class(f'fashion.models.{args.model_class}')
-    # model_group = parser.add_argument_group('Model Args')
-    # model_class.add_argparse_args(model_group)
+    model_class = import_class(f'fashion.models.{args.model_class}')
+    model_group = parser.add_argument_group('Model Args')
+    model_class.add_argparse_args(model_group)
 
     # lit_model_class = import_class(
     #     f'fashion.lit_models.{args.lit_model_class}')
