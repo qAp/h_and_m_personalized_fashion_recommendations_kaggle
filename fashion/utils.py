@@ -32,10 +32,10 @@ def setup_parser():
     model_group = parser.add_argument_group('Model Args')
     model_class.add_argparse_args(model_group)
 
-    # lit_model_class = import_class(
-    #     f'fashion.lit_models.{args.lit_model_class}')
-    # lit_model_group = parser.add_argument_group('LitModel Args')
-    # lit_model_class.add_argparse_args(lit_model_group)
+    lit_model_class = import_class(
+        f'fashion.lit_models.{args.lit_model_class}')
+    lit_model_group = parser.add_argument_group('LitModel Args')
+    lit_model_class.add_argparse_args(lit_model_group)
 
     parser.add_argument('--help', '-h', action='help')
     return parser
