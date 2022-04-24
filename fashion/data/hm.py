@@ -74,8 +74,8 @@ class HM(pl.LightningDataModule):
         _add = parser.add_argument
         _add('--meta_data_dir', type=str, default=META_DATA_DIR)
         _add('--week_hist_max', type=int, default=WEEK_HIST_MAX)
-        _add('--val_weeks', type=int, action='nargs', default=VAL_WEEKS)
-        _add('--train_weeks', type=int, action='nargs', default=TRAIN_WEEKS)
+        _add('--val_weeks', type=int, nargs='+', default=VAL_WEEKS)
+        _add('--train_weeks', type=int, nargs='+', default=TRAIN_WEEKS)
 
     def prepare_data(self):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
