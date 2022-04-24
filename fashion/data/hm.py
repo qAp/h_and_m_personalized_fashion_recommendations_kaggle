@@ -146,7 +146,7 @@ class HM(pl.LightningDataModule):
             .rename(columns={'article_id': 'target'})
         )
         target_df['week'] = week
-        
+
         return target_df.merge(hist_df, on='customer_id', how='left')
 
     def setup(self):
@@ -181,7 +181,7 @@ class HM(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=True,
             drop_last=True,
-            num_workers=self.num_workes,
+            num_workers=self.num_workers,
             pin_memory=self.on_gpu
         )
 
