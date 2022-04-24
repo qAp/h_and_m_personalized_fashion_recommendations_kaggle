@@ -59,6 +59,9 @@ META_DATA_DIR = '/kaggle/working/hm_meta_data'
 WEEK_HIST_MAX = 5
 VAL_WEEKS = [0]
 TRAIN_WEEKS = [1, 2, 3, 4]
+SEQ_LEN = 16
+BATCH_SIZE = 256
+NUM_WORKERS = os.cpu_count()
 
 class HM(pl.LightningDataModule):
     def __init__(self, args=None):
@@ -68,6 +71,11 @@ class HM(pl.LightningDataModule):
         self.week_hist_max = self.args.get('week_hist_max', WEEK_HIST_MAX)
         self.val_weeks = self.args.get('val_weeks', VAL_WEEKS)
         self.train_weeks = self.args.get('train_weeks', TRAIN_WEEKS)
+        self.seq_len = self.args.get('seq_len', SEQ_LEN)
+
+        self.batch_size = self.args.get('batch_size', BATCH_SIZE)
+        self.num_workers = self.args.get('num_workers', NUM_WORKERS)
+        self.on_gpu = isinstance(self.args.get('gpus', None), (int, str))
 
     @staticmethod
     def add_argparse_args(parser):
@@ -76,6 +84,8 @@ class HM(pl.LightningDataModule):
         _add('--week_hist_max', type=int, default=WEEK_HIST_MAX)
         _add('--val_weeks', type=int, nargs='+', default=VAL_WEEKS)
         _add('--train_weeks', type=int, nargs='+', default=TRAIN_WEEKS)
+        _add('--seq_len', type=int, default=SEQ_LEN)
+        _add('--num_workers', type=int, default=NUM_WORKERS)
 
     def prepare_data(self):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
