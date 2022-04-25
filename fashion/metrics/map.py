@@ -19,6 +19,7 @@ def calc_map(topk_preds, target_array, k=12):
 
 class MAP(nn.Module):
     def __init__(self, k=12):
+        super().__init__()
         self.k = k
 
     @torch.no_grad()
