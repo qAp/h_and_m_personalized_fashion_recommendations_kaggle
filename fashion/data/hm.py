@@ -149,6 +149,26 @@ class HM(pl.LightningDataModule):
 
         return target_df.merge(hist_df, on='customer_id', how='left')
 
+    def create_test_dataset(self, df):
+        test_df = pd.read_csv(f'{COMP_DIR}/sample_submission.csv')
+        test_df.drop('prediction', axis=1, inplace=True)
+
+        week = -1
+        test_df['week'] = week
+
+        is_hist_week = (
+            (week + self.week_hist_max >= df['week']) &  (df['week'] > week)
+            )
+        hist_df = (
+            df[is_hist_week]
+            .groupby('customer_id')
+            .agg({'article_id': list, 'week': list})
+            .reset_index()
+            .rename(columns={'week': 'week_history'})
+        )
+
+        return test_df.merge(hist_df, on='customer_id', how='left')
+
     def setup(self):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
         label_encoder_path = f'{self.meta_data_dir}/label_encoder'
@@ -177,6 +197,13 @@ class HM(pl.LightningDataModule):
                                   num_article_ids=len(le_article.classes_),
                                   week_hist_max=self.week_hist_max)
 
+        test_df = self.create_test_dataset(df)
+        self.test_ds = HMDataset(test_df,
+                                 self.seq_len,
+                                 num_article_ids=len(le_article.classes_),
+                                 week_hist_max=self.week_hist_max,
+                                 is_test=True)
+
     def config(self):
         return {'num_article_ids': len(self.le_article.classes_)}
 
@@ -200,6 +227,16 @@ class HM(pl.LightningDataModule):
                 num_workers=self.num_workers,
                 pin_memory=self.on_gpu
             )
+
+    def test_dataloader(self):
+        return DataLoader(
+            self.test_ds,
+            batch_size=self.batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=self.num_workers,
+            pin_memory=self.on_gpu
+        )
 
 
 def prepare_data():
