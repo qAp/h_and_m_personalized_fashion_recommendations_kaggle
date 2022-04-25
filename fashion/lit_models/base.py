@@ -2,7 +2,7 @@
 import torch
 import pytorch_lightning as pl
 from fashion.losses.dice import dice_loss
-from fashion.metrics.map import calc_map
+from fashion.metrics.map import MAP
 
 
 LR = 1e-4
@@ -16,7 +16,7 @@ class BaseLitModel(pl.LightningModule):
 
         self.dice_loss = dice_loss
         self.bce_loss = torch.nn.BCEWithLogitsLoss()
-        self.mean_average_precision = calc_map
+        self.mean_average_precision = MAP(k=12)
 
         self.lr = self.args.get('lr', LR)
 
@@ -43,7 +43,9 @@ class BaseLitModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         logits, target = self._shared_step(batch)
         loss = self.dice_loss(logits, target) + self.bce_loss(logits, target)
-        score = self.mean_average_precision(logits, target)
+
+        topked = torch.topk(logits, dim=1, k=12)
+        score = self.mean_average_precision(topked.indices, target)
         self.log('train_loss', loss)
         self.log('valid_loss', score)
 
