@@ -43,9 +43,14 @@ class BaseLitModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         logits, target = self._shared_step(batch)
         loss = self.dice_loss(logits, target) + self.bce_loss(logits, target)
-
         topked = torch.topk(logits, dim=1, k=12)
         score = self.mean_average_precision(topked.indices, target)
         self.log('valid_loss', loss)
         self.log('valid_score', score)
+
+    @torch.no_grad()
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        logits, _ = self._shared_step(batch)
+        topked = torch.topk(logits, dim=1, k=12)
+        return topked.indices
 
