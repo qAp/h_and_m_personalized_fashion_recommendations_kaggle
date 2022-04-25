@@ -46,6 +46,6 @@ class BaseLitModel(pl.LightningModule):
 
         topked = torch.topk(logits, dim=1, k=12)
         score = self.mean_average_precision(topked.indices, target)
-        self.log('train_loss', loss)
-        self.log('valid_loss', score)
+        self.log('valid_loss', loss)
+        self.log('valid_score', score)
 
