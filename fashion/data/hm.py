@@ -150,7 +150,7 @@ class HM(pl.LightningDataModule):
         return target_df.merge(hist_df, on='customer_id', how='left')
 
     def create_test_dataset(self, df):
-        test_df = pd.read_csv(f'{COMP_DIR}/sample_submission.csv').iloc[:1_000]
+        test_df = pd.read_csv(f'{COMP_DIR}/sample_submission.csv')
         test_df.drop('prediction', axis=1, inplace=True)
 
         week = -1
