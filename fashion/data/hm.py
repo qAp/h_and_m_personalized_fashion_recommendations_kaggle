@@ -112,9 +112,9 @@ class HM(pl.LightningDataModule):
         df['week'] = (df['t_dat'].max() - df['t_dat']).dt.days // 7
 
         print('Encoding articles IDs')
-        # article_ids = np.concatenate([['placeholder'], df['article_id'].unique()])
-        article_ids = np.concatenate(
-            [["placeholder"], np.unique(df["article_id"].values)])
+        article_ids = np.concatenate([
+            [10*'0'], df["article_id"].unique()
+            ])
         le_article = LabelEncoder()
         le_article.fit(article_ids)
         df['article_id'] = le_article.transform(df['article_id'])
