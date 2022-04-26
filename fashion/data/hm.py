@@ -173,11 +173,12 @@ class HM(pl.LightningDataModule):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
         label_encoder_path = f'{self.meta_data_dir}/label_encoder'
 
+        print(f'Loading meta data at {meta_data_path}...')
         df = pd.read_parquet(meta_data_path)
         le_article = joblib.load(label_encoder_path)
-
         self.le_article = le_article
 
+        print('Creating validation set...')
         if self.val_weeks:
             val_df = pd.concat([
                 self.create_dataset(df, w) for w in self.val_weeks
@@ -188,6 +189,7 @@ class HM(pl.LightningDataModule):
                                     num_article_ids=len(le_article.classes_),
                                     week_hist_max=self.week_hist_max)
 
+        print('Creating training set...')
         train_df = pd.concat([
             self.create_dataset(df, w) for w in self.train_weeks
             ]).reset_index(drop=True)
@@ -197,6 +199,7 @@ class HM(pl.LightningDataModule):
                                   num_article_ids=len(le_article.classes_),
                                   week_hist_max=self.week_hist_max)
 
+        print('Creating test set...')
         test_df = self.create_test_dataset(df)
         self.test_ds = HMDataset(test_df,
                                  self.seq_len,
