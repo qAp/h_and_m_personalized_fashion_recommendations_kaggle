@@ -50,6 +50,8 @@ def main():
 
     ss_df = pd.read_csv(f'{COMP_DIR}/sample_submission.csv')
     ss_df.loc[:1_000 - 1, 'prediction'] = preds
+    ss_df.to_csv('/kaggle/working/submission.csv', index=False)
+
 
 
 if __name__ == '__main__':
