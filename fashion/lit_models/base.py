@@ -36,15 +36,23 @@ class BaseLitModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         logits, target = self._shared_step(batch)
-        loss = self.dice_loss(logits, target) + self.bce_loss(logits, target)
+        dice_loss = self.dice_loss(logits, target)
+        bce_loss = self.bce_loss(logits, target)
+        loss = dice_loss + bce_loss
+        self.log('train_dice_loss', dice_loss)
+        self.log('train_bce_loss', bce_loss)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         logits, target = self._shared_step(batch)
-        loss = self.dice_loss(logits, target) + self.bce_loss(logits, target)
+        dice_loss = self.dice_loss(logits, target)
+        bce_loss = self.bce_loss(logits, target)
+        loss = dice_loss + bce_loss
         topked = torch.topk(logits, dim=1, k=12)
         score = self.mean_average_precision(topked.indices, target)
+        self.log('valid_dice_loss', dice_loss)
+        self.log('valid_bce_loss', bce_loss)
         self.log('valid_loss', loss)
         self.log('valid_score', score)
 
