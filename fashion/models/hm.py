@@ -39,9 +39,7 @@ class HMModel(nn.Module):
         x = x.clamp(1e-3, 0.999)
         x = -torch.log(1/x - 1)
 
-        max_week = week_hist.unsqueeze(2).repeat(
-            1, 1, x.shape[-1]).gather(1, indices.unsqueeze(1).repeat(1, week_hist.shape[1], 1))    # (N, seq_len, num_class)
-        max_week = max_week.mean(axis=1).unsqueeze(1)    # (N, 1, num_class)
+        max_week = week_hist.gather(1, indices).unsqueeze(1)    # (N, 1, num_class)
 
         x = torch.cat([x.unsqueeze(1), max_week,
                        self.article_likelihood[None, None, :].repeat(x.shape[0], 1, 1)], axis=1)    # (N, 3, num_class)
