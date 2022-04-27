@@ -1,7 +1,7 @@
 
 import torch
 import pytorch_lightning as pl
-from fashion.losses.dice import dice_loss
+from fashion.losses.dice import dice_loss, dice_loss_1
 from fashion.metrics.map import MAP
 
 
@@ -14,7 +14,7 @@ class BaseLitModel(pl.LightningModule):
         self.args = vars(args) if args is not None else {}
         self.model = model
 
-        self.dice_loss = dice_loss
+        self.dice_loss = dice_loss_1
         self.bce_loss = torch.nn.BCEWithLogitsLoss()
         self.mean_average_precision = MAP(k=12)
 
