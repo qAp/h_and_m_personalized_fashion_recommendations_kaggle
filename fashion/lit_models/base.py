@@ -1,11 +1,16 @@
 
+from fashion.utils import import_class
 import torch
 import pytorch_lightning as pl
+from pytorch.optim.lr_scheduler import MultiStepLR
 from fashion.losses.dice import dice_loss, dice_loss_1
 from fashion.metrics.map import MAP
 
 
 LR = 1e-4
+LR_SCHEDULER = None
+MULTISTEP_GAMMA = 0.5
+MULTISTEP_MILESTONES = [5, 10, 15, 20, 25, 30, 35, 40]
 
 class BaseLitModel(pl.LightningModule):
 
@@ -19,14 +24,37 @@ class BaseLitModel(pl.LightningModule):
         self.mean_average_precision = MAP(k=12)
 
         self.lr = self.args.get('lr', LR)
+        self.lr_scheduler = self.args.get('lr_scheduler', LR_SCHEDULER)
+        self.multistep_gamma = self.args.get(
+            'multistep_gamma', MULTISTEP_GAMMA)
+        self.multistep_milestones = self.args.get(
+            'multistep_milestones', MULTISTEP_MILESTONES)
 
     def add_argparse_args(parser):
         _add = parser.add_argument
         _add('--lr', type=float, default=LR)
+        _add('--lr_scheduler', type=float, default=LR_SCHEDULER)
+        _add('--multistep_gamma', type=float, default=MULTISTEP_GAMMA)
+        _add('--multistep_milestones', type=int, nargs='+', 
+             default=MULTISTEP_MILESTONES)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        return {'optimizer': optimizer}
+
+        if self.lr_scheduler is None:
+            return {'optimizer': optimizer}
+
+        elif self.lr_scheduler == 'MultiStepLR':
+            lr_scheduler = MultiStepLR(optimizer, 
+                                       gamma=self.multistep_gamma, 
+                                       milestones=self.multistep_milestones)
+            return {'optimizer': optimizer, 
+                    'lr_scheduler': {'scheduler': lr_scheduler}
+            }
+        else:
+            raise NotImplementedError
+            
+            
 
     def _shared_step(self, batch):
         article_hist, week_hist, target = batch
