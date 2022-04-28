@@ -32,7 +32,7 @@ class BaseLitModel(pl.LightningModule):
     def add_argparse_args(parser):
         _add = parser.add_argument
         _add('--lr', type=float, default=LR)
-        _add('--lr_scheduler', type=float, default=LR_SCHEDULER)
+        _add('--lr_scheduler', type=str, default=LR_SCHEDULER)
         _add('--multistep_gamma', type=float, default=MULTISTEP_GAMMA)
         _add('--multistep_milestones', type=int, nargs='+', 
              default=MULTISTEP_MILESTONES)
