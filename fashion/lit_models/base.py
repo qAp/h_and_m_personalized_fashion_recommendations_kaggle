@@ -1,8 +1,7 @@
 
-from fashion.utils import import_class
 import torch
 import pytorch_lightning as pl
-from pytorch.optim.lr_scheduler import MultiStepLR
+from torch.optim.lr_scheduler import MultiStepLR
 from fashion.losses.dice import dice_loss, dice_loss_1
 from fashion.metrics.map import MAP
 
