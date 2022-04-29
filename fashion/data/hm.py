@@ -85,6 +85,7 @@ class HM(pl.LightningDataModule):
         _add('--val_weeks', type=int, nargs='+', default=VAL_WEEKS)
         _add('--train_weeks', type=int, nargs='+', default=TRAIN_WEEKS)
         _add('--seq_len', type=int, default=SEQ_LEN)
+        _add('--batch_size', type=int, default=BATCH_SIZE)
         _add('--num_workers', type=int, default=NUM_WORKERS)
 
     def prepare_data(self):
