@@ -33,4 +33,4 @@ class MAP(nn.Module):
         for i in range(len(indices)):
             maps.append(calc_map(indices[i], targets[i]))
 
-        return np.sum(maps)
+        return np.mean(maps)
