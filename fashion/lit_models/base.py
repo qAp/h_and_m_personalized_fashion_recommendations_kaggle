@@ -76,8 +76,8 @@ class BaseLitModel(pl.LightningModule):
         dice_loss = self.dice_loss(logits, target)
         bce_loss = self.bce_loss(logits, target)
         loss = dice_loss + bce_loss
-        topked = torch.topk(logits, dim=1, k=12)
-        score = self.mean_average_precision(topked.indices, target)
+        score = self.mean_average_precision(logits, target)
+        
         self.log('valid_dice_loss', dice_loss)
         self.log('valid_bce_loss', bce_loss)
         self.log('valid_loss', loss)
