@@ -213,7 +213,8 @@ class HM(pl.LightningDataModule):
                                  is_test=True)
 
     def config(self):
-        return {'num_article_ids': len(self.le_article.classes_)}
+        return {'num_article_ids': len(self.le_article.classes_),
+                'seq_len': self.seq_len}
 
     def train_dataloader(self):
         return DataLoader(
