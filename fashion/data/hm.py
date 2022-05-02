@@ -12,6 +12,52 @@ import pytorch_lightning as pl
 from fashion.config import *
 
 
+
+def create_dataset(df, week=0, week_hist_max=5):
+    is_hist_week = (
+        (week + week_hist_max >= df['week']) & (df['week'] > week)
+    )
+    is_target_week = (df['week'] == week)
+
+    hist_df = (
+        df[is_hist_week]
+        .groupby('customer_id')
+        .agg({'article_id': list, 'week': list})
+        .reset_index()
+        .rename(columns={'week': 'week_history'})
+    )
+
+    target_df = (
+        df[is_target_week]
+        .groupby('customer_id')
+        .agg({'article_id': list})
+        .reset_index()
+        .rename(columns={'article_id': 'target'})
+    )
+    target_df['week'] = week
+    return target_df.merge(hist_df, on='customer_id', how='left')
+
+
+def create_test_dataset(df, week_hist_max=5):
+    test_df = pd.read_csv(f'{COMP_DIR}/sample_submission.csv')
+    test_df.drop('prediction', axis=1, inplace=True)
+
+    week = -1
+    test_df['week'] = week
+
+    is_hist_week = (
+        (week + week_hist_max >= df['week']) & (df['week'] > week)
+    )
+    hist_df = (
+        df[is_hist_week]
+        .groupby('customer_id')
+        .agg({'article_id': list, 'week': list})
+        .reset_index()
+        .rename(columns={'week': 'week_history'})
+    )
+    return test_df.merge(hist_df, on='customer_id', how='left')
+
+
 class HMDataset(Dataset):
     def __init__(self, df, seq_len=16, num_article_ids=100, week_hist_max=5,
                  is_test=False):
@@ -62,6 +108,7 @@ TRAIN_WEEKS = [1, 2, 3, 4]
 SEQ_LEN = 16
 BATCH_SIZE = 256
 NUM_WORKERS = os.cpu_count()
+
 
 class HM(pl.LightningDataModule):
     def __init__(self, args=None):
@@ -124,52 +171,7 @@ class HM(pl.LightningDataModule):
         pathlib.Path(self.meta_data_dir).mkdir(exist_ok=True, parents=True)
         df.to_parquet(meta_data_path)
         joblib.dump(le_article, label_encoder_path)
-
-    def create_dataset(self, df, week):
-        is_hist_week = (
-            (week + self.week_hist_max >= df['week']) & (df['week'] > week)
-        )
-        is_target_week = (df['week'] == week)
-
-        hist_df = (
-            df[is_hist_week]
-            .groupby('customer_id')
-            .agg({'article_id': list, 'week': list})
-            .reset_index()
-            .rename(columns={'week': 'week_history'})
-        )
-
-        target_df = (
-            df[is_target_week]
-            .groupby('customer_id')
-            .agg({'article_id': list})
-            .reset_index()
-            .rename(columns={'article_id': 'target'})
-        )
-        target_df['week'] = week
-
-        return target_df.merge(hist_df, on='customer_id', how='left')
-
-    def create_test_dataset(self, df):
-        test_df = pd.read_csv(f'{COMP_DIR}/sample_submission.csv')
-        test_df.drop('prediction', axis=1, inplace=True)
-
-        week = -1
-        test_df['week'] = week
-
-        is_hist_week = (
-            (week + self.week_hist_max >= df['week']) &  (df['week'] > week)
-            )
-        hist_df = (
-            df[is_hist_week]
-            .groupby('customer_id')
-            .agg({'article_id': list, 'week': list})
-            .reset_index()
-            .rename(columns={'week': 'week_history'})
-        )
-
-        return test_df.merge(hist_df, on='customer_id', how='left')
-
+        
     def setup(self):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
         label_encoder_path = f'{self.meta_data_dir}/label_encoder'
@@ -182,7 +184,8 @@ class HM(pl.LightningDataModule):
         print('Creating validation set...')
         if self.val_weeks:
             val_df = pd.concat([
-                self.create_dataset(df, w) for w in self.val_weeks
+                create_dataset(df, w, self.week_hist_max) 
+                for w in self.val_weeks
                 ]).reset_index(drop=True)
 
             self.valid_ds = HMDataset(val_df,
@@ -192,7 +195,8 @@ class HM(pl.LightningDataModule):
 
         print('Creating training set...')
         train_df = pd.concat([
-            self.create_dataset(df, w) for w in self.train_weeks
+            create_dataset(df, w, self.week_hist_max) 
+            for w in self.train_weeks
             ]).reset_index(drop=True)
 
         self.train_ds = HMDataset(train_df, 
@@ -201,7 +205,7 @@ class HM(pl.LightningDataModule):
                                   week_hist_max=self.week_hist_max)
 
         print('Creating test set...')
-        test_df = self.create_test_dataset(df)
+        test_df = create_test_dataset(df, self.week_hist_max)
         self.test_ds = HMDataset(test_df,
                                  self.seq_len,
                                  num_article_ids=len(le_article.classes_),
