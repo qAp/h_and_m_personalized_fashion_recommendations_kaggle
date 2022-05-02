@@ -171,7 +171,7 @@ class HM(pl.LightningDataModule):
         pathlib.Path(self.meta_data_dir).mkdir(exist_ok=True, parents=True)
         df.to_parquet(meta_data_path)
         joblib.dump(le_article, label_encoder_path)
-        
+
     def setup(self):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
         label_encoder_path = f'{self.meta_data_dir}/label_encoder'
@@ -255,3 +255,13 @@ def prepare_data():
 
     data = HM(args)
     data.prepare_data()
+
+
+def describe_history_length(df, week=0, week_hist_max=5):
+    out_df = create_dataset(df, week, week_hist_max)
+
+    history_length = out_df['week_history'].map(
+        lambda x: len(x) if isinstance(x, list) else 0)
+    print(history_length.describe())
+    history_length.hist(bins=20)
+
