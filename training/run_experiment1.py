@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 from fashion.utils import import_class
 
 
-def _setup_parser():
+def setup_parser():
     parser = argparse.ArgumentParser(add_help=False)
     pl.Trainer.add_argparse_args(parser)
 
@@ -41,7 +41,7 @@ def _setup_parser():
 
 
 def main():
-    parser = _setup_parser()
+    parser = setup_parser()
 
     args = parser.parse_args()
     print(args)
