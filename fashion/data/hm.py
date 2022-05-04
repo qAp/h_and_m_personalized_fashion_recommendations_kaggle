@@ -264,8 +264,17 @@ def describe_history_length(df, week=0, week_hist_max=5):
 
     history_length = out_df['week_history'].map(
         lambda x: len(x) if isinstance(x, list) else 0)
+
+    print(f'week = {week}')
+    print(f'week_hist_max = {week_hist_max}')
+    print('Distribution of history lengths')
+
     print(history_length.describe())
-    history_length.hist(bins=20)
+
+    fig, ax = plt.subplots(figsize=(12, 4))
+    ax.hist(history_length.values, bins=50)
+    ax.set_xlabel('History length')
+    ax.set_ylabel('Count')
 
 
 def describe_article_id(df, weeks=[0], week_hist_max=5):
