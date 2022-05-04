@@ -2,6 +2,7 @@
 import os
 import argparse
 import pathlib
+from tqdm.auto import tqdm
 import joblib
 import numpy as np
 import pandas as pd
@@ -319,3 +320,45 @@ def describe_article_id(df, weeks=[0], week_hist_max=5):
     ax.hist(hist_cover['history'].values, bins=100)
     ax.set_xlabel('Number of unique history ids')
     ax.set_ylabel('Number of target ids')
+
+
+def describe_article_id_1(df, weeks=[0], week_hist_max=5):
+
+    out_df = pd.concat(
+        [create_dataset(df, w, week_hist_max) for w in weeks],
+        axis=0
+    ).reset_index(drop=True)
+
+    history_cnt = {}
+    target_cnt = {}
+    history_cover = {}
+    for _, r in tqdm(out_df.iterrows(), total=len(out_df)):
+        history_ids = r['article_id'] if isinstance(
+            r['article_id'], list) else []
+        target_ids = r['target'] if isinstance(r['target'], list) else []
+
+        for tid in target_ids:
+
+            if tid not in history_cover:
+                history_cover[tid] = set()
+            else:
+                history_cover[tid].update(set(history_ids))
+
+            for hid in history_ids:
+
+                if hid not in history_cnt:
+                    history_cnt[hid] = 0
+                else:
+                    history_cnt[hid] += 1
+
+                if tid not in target_cnt:
+                    target_cnt[tid] = 0
+                else:
+                    target_cnt[tid] += 1
+
+    print('len(weeks)=', len(weeks), 'min(weeks)=',
+          min(weeks), 'max(weeks)=', max(weeks))
+    print('week_hist_max', week_hist_max)
+
+    print('Number of unique ids in histories', len(history_cnt.keys()))
+    print('Number of unique ids in targets', len(target_cnt.keys()))
