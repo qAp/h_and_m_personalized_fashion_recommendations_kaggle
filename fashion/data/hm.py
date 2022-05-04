@@ -5,6 +5,7 @@ import pathlib
 import joblib
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 import torch, torch.nn as nn, torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
@@ -266,3 +267,46 @@ def describe_history_length(df, week=0, week_hist_max=5):
     print(history_length.describe())
     history_length.hist(bins=20)
 
+
+def describe_article_id(df, weeks=[0], week_hist_max=5):
+
+    out_df = pd.concat(
+        [create_dataset(df, w, week_hist_max) for w in weeks],
+        axis=0
+    ).reset_index(drop=True)
+
+    history_list = []
+    target_list = []
+    for _, r in tqdm(out_df.iterrows(), total=len(out_df)):
+        history_ids = r['article_id'] if isinstance(
+            r['article_id'], list) else []
+        target_ids = r['target'] if isinstance(r['target'], list) else []
+
+        for hid in history_ids:
+            for tid in target_ids:
+                history_list.append(hid)
+                target_list.append(tid)
+
+    pairs = pd.DataFrame({'history': history_list, 'target': target_list})
+
+    print('len(weeks)=', len(weeks), 'min(weeks)=',
+          min(weeks), 'max(weeks)=', max(weeks))
+    print('week_hist_max', week_hist_max)
+    print('Number of unique ids in histories', pairs['history'].nunique())
+    print('Number of unique ids in targets', pairs['target'].nunique())
+
+    fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
+    axs = axs.flatten()
+    ax = axs[0]
+    ax.hist(pairs['history'].values, bins=20, color='blue', label='history')
+    ax.hist(pairs['target'].values, bins=20,
+            color='orange', label='target', alpha=0.7)
+    ax.set_xlabel('article_id')
+    ax.set_ylabel('Count')
+    ax.legend()
+
+    hist_cover = pairs.groupby('target')['history'].nunique().reset_index()
+    ax = axs[1]
+    ax.hist(hist_cover['history'].values, bins=100)
+    ax.set_xlabel('Number of unique history ids')
+    ax.set_ylabel('Number of target ids')
