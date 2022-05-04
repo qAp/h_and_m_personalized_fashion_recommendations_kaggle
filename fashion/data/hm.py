@@ -85,7 +85,7 @@ class HMDataset(Dataset):
         article_hist = torch.zeros(self.seq_len).long()
         week_hist = torch.ones(self.seq_len).float()
 
-        if isinstance(row.article_id, list):
+        if isinstance(row.article_id, (list, np.ndarray)):
             if len(row.article_id) >= self.seq_len:
                 article_hist = torch.LongTensor(row.article_id[-self.seq_len:])
                 week_hist = (
@@ -199,7 +199,8 @@ class HM(pl.LightningDataModule):
         print('Creating validation set...')
         if self.val_weeks:
             val_df = pd.concat([
-                create_dataset(df, w, self.week_hist_max) 
+                pd.read_parquet(
+                    f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
                 for w in self.val_weeks
                 ]).reset_index(drop=True)
 
@@ -210,7 +211,8 @@ class HM(pl.LightningDataModule):
 
         print('Creating training set...')
         train_df = pd.concat([
-            create_dataset(df, w, self.week_hist_max) 
+            pd.read_parquet(
+                f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
             for w in self.train_weeks
             ]).reset_index(drop=True)
 
