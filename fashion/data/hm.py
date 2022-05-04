@@ -86,16 +86,17 @@ class HMDataset(Dataset):
         week_hist = torch.ones(self.seq_len).float()
 
         if isinstance(row.article_id, (list, np.ndarray)):
-            if len(row.article_id) >= self.seq_len:
-                article_hist = torch.LongTensor(row.article_id[-self.seq_len:])
+            article_id = list(row.article_id)
+            if len(article_id) >= self.seq_len:
+                article_hist = torch.LongTensor(article_id[-self.seq_len:])
                 week_hist = (
                     (torch.LongTensor(
                         row.week_history[-self.seq_len:]) - row.week)
                     / self.week_hist_max / 2
                 )
             else:
-                article_hist[-len(row.article_id):] = torch.LongTensor(row.article_id)  
-                week_hist[-len(row.article_id):] = (
+                article_hist[-len(article_id):] = torch.LongTensor(article_id)  
+                week_hist[-len(article_id):] = (
                     (torch.LongTensor(row.week_history) - row.week)
                     / self.week_hist_max / 2
                 )
