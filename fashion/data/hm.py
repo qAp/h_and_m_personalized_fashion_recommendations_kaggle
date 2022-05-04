@@ -141,9 +141,16 @@ class HM(pl.LightningDataModule):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
         label_encoder_path = f'{self.meta_data_dir}/label_encoder'
 
-        meta_data_exists = os.path.exists(meta_data_path)
-        label_encoder_exists = os.path.exists(label_encoder_path)
-        if meta_data_exists and label_encoder_exists:
+        hm_df_paths = [
+            f'hm_df_week{w}_hist_max{self.week_hist_max}.parquet'
+            for w in self.val_weeks + self.train_weeks]
+        hm_df_paths = [f'{self.meta_data_dir}/{p}' for p in hm_df_paths]
+
+        all_exists = all(
+            os.path.exists(p)
+            for p in [meta_data_path, label_encoder_path] + hm_df_paths)
+
+        if all_exists:
             print('Found existing meta data.  Data prepared.')
             return
 
@@ -173,6 +180,12 @@ class HM(pl.LightningDataModule):
         pathlib.Path(self.meta_data_dir).mkdir(exist_ok=True, parents=True)
         df.to_parquet(meta_data_path)
         joblib.dump(le_article, label_encoder_path)
+
+        print('HM dataframes...')
+        for w, p in tqdm(zip(self.val_weeks + self.train_weeks, hm_df_paths),
+                         total=len(hm_df_paths)):
+            hm_df = create_dataset(df, w, self.week_hist_max)
+            hm_df.to_parquet(p)
 
     def setup(self):
         meta_data_path = f'{self.meta_data_dir}/train.parquet'
@@ -254,7 +267,7 @@ def prepare_data():
     parser = argparse.ArgumentParser()
 
     HM.add_argparse_args(parser)
-    args = parser.parse_args([])
+    args = parser.parse_args()
 
     data = HM(args)
     data.prepare_data()
