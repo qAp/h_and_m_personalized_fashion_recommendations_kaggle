@@ -288,8 +288,10 @@ def prepare_data():
     data.prepare_data()
 
 
-def describe_history_length(df, week=0, week_hist_max=5):
-    out_df = create_dataset(df, week, week_hist_max)
+def describe_history_length(meta_data_dir, week=0, week_hist_max=5):
+    parquet_path = f'{meta_data_dir}/hm_df_week{week}_hist_max{week_hist_max}.parquet'
+
+    out_df = load_hm_df(parquet_path)
 
     history_length = out_df['week_history'].map(
         lambda x: len(x) if isinstance(x, list) else 0)
