@@ -60,6 +60,18 @@ def create_test_dataset(df, week_hist_max=5):
     return test_df.merge(hist_df, on='customer_id', how='left')
 
 
+def _to_list(x):
+    return list(x) if isinstance(x, np.ndarray) else x
+
+
+def load_hm_df(parquet_path):
+    df = pd.read_parquet(parquet_path)
+    df['article_id'] = df['article_id'].apply(_to_list)
+    df['week_history'] = df['week_history'].apply(_to_list)
+    df['target'] = df['target'].apply(_to_list)
+    return df
+
+
 class HMDataset(Dataset):
     def __init__(self, df, seq_len=16, num_article_ids=100, week_hist_max=5,
                  is_test=False):
@@ -86,20 +98,17 @@ class HMDataset(Dataset):
         week_hist = torch.ones(self.seq_len).float()
 
         if isinstance(row.article_id, (list, np.ndarray)):
-            article_id = row.article_id
-            if isinstance(article_id, np.ndarray):
-                article_id = list(article_id.copy())
-                
-            if len(article_id) >= self.seq_len:
-                article_hist = torch.LongTensor(article_id[-self.seq_len:])
+
+            if len(row.article_id) >= self.seq_len:
+                article_hist = torch.LongTensor(row.article_id[-self.seq_len:])
                 week_hist = (
                     (torch.LongTensor(
                         row.week_history[-self.seq_len:]) - row.week)
                     / self.week_hist_max / 2
                 )
             else:
-                article_hist[-len(article_id):] = torch.LongTensor(article_id)  
-                week_hist[-len(article_id):] = (
+                article_hist[-len(row.article_id):] = torch.LongTensor(row.article_id)  
+                week_hist[-len(row.article_id):] = (
                     (torch.LongTensor(row.week_history) - row.week)
                     / self.week_hist_max / 2
                 )
@@ -203,7 +212,7 @@ class HM(pl.LightningDataModule):
         print('Creating validation set...')
         if self.val_weeks:
             val_df = pd.concat([
-                pd.read_parquet(
+                load_hm_df(
                     f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
                 for w in self.val_weeks
                 ]).reset_index(drop=True)
@@ -215,7 +224,7 @@ class HM(pl.LightningDataModule):
 
         print('Creating training set...')
         train_df = pd.concat([
-            pd.read_parquet(
+            load_hm_df(
                 f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
             for w in self.train_weeks
             ]).reset_index(drop=True)
