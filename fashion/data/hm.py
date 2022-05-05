@@ -350,12 +350,14 @@ def describe_article_id(df, weeks=[0], week_hist_max=5):
     ax.set_ylabel('Number of target ids')
 
 
-def describe_article_id_1(df, weeks=[0], week_hist_max=5):
+def describe_article_id_1(meta_data_dir, weeks=[0], week_hist_max=5):
+    parquet_paths = [
+        f'{meta_data_dir}/hm_df_week{w}_hist_max{week_hist_max}.parquet'
+        for w in weeks
+    ]
 
-    out_df = pd.concat(
-        [create_dataset(df, w, week_hist_max) for w in weeks],
-        axis=0
-    ).reset_index(drop=True)
+    out_df = pd.concat([load_hm_df(p) for p in parquet_paths],
+                       axis=0).reset_index(drop=True)
 
     history_cnt = {}
     target_cnt = {}
