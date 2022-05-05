@@ -26,9 +26,6 @@ class MAP(nn.Module):
     def forward(self, logits, targets):
         _, indices = torch.topk(logits, dim=1, k=self.k)
 
-        indices = indices.detach().cpu().numpy()
-        targets = targets.detach().cpu().numpy()
-
         maps = []
         for i in range(len(indices)):
             maps.append(calc_map(indices[i], targets[i]))
