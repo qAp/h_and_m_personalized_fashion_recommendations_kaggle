@@ -119,9 +119,6 @@ class HMDataset(Dataset):
                     / self.week_hist_max / 2
                 )
 
-        del row
-        gc.collect()
-
         return article_hist, week_hist, target
 
 
