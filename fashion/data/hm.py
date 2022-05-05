@@ -205,7 +205,6 @@ class HM(pl.LightningDataModule):
         label_encoder_path = f'{self.meta_data_dir}/label_encoder'
 
         print(f'Loading meta data at {meta_data_path}...')
-        df = pd.read_parquet(meta_data_path)
         le_article = joblib.load(label_encoder_path)
         self.le_article = le_article
 
@@ -234,14 +233,6 @@ class HM(pl.LightningDataModule):
                                   num_article_ids=len(le_article.classes_),
                                   week_hist_max=self.week_hist_max)
 
-        print('Creating test set...')
-        test_df = create_test_dataset(df, self.week_hist_max)
-        self.test_ds = HMDataset(test_df,
-                                 self.seq_len,
-                                 num_article_ids=len(le_article.classes_),
-                                 week_hist_max=self.week_hist_max,
-                                 is_test=True)
-
     def config(self):
         return {'num_article_ids': len(self.le_article.classes_),
                 'seq_len': self.seq_len}
@@ -266,16 +257,6 @@ class HM(pl.LightningDataModule):
                 num_workers=self.num_workers,
                 pin_memory=self.on_gpu
             )
-
-    def test_dataloader(self):
-        return DataLoader(
-            self.test_ds,
-            batch_size=self.batch_size,
-            shuffle=False,
-            drop_last=False,
-            num_workers=self.num_workers,
-            pin_memory=self.on_gpu
-        )
 
 
 def prepare_data():
