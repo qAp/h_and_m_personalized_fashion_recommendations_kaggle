@@ -1,5 +1,6 @@
 
 import os
+import gc
 import argparse
 import pathlib
 from tqdm.auto import tqdm
@@ -210,28 +211,31 @@ class HM(pl.LightningDataModule):
 
         print('Creating validation set...')
         if self.val_weeks:
-            val_df = pd.concat([
+            hm_df = pd.concat([
                 load_hm_df(
                     f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
                 for w in self.val_weeks
                 ]).reset_index(drop=True)
 
-            self.valid_ds = HMDataset(val_df,
+            self.valid_ds = HMDataset(hm_df,
                                     self.seq_len,
                                     num_article_ids=len(le_article.classes_),
                                     week_hist_max=self.week_hist_max)
 
         print('Creating training set...')
-        train_df = pd.concat([
+        hm_df = pd.concat([
             load_hm_df(
                 f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
             for w in self.train_weeks
             ]).reset_index(drop=True)
 
-        self.train_ds = HMDataset(train_df, 
+        self.train_ds = HMDataset(hm_df, 
                                   self.seq_len, 
                                   num_article_ids=len(le_article.classes_),
                                   week_hist_max=self.week_hist_max)
+
+        del hm_df
+        gc.collect()
 
     def config(self):
         return {'num_article_ids': len(self.le_article.classes_),
