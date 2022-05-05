@@ -73,6 +73,11 @@ def load_hm_df(parquet_path):
     return df
 
 
+def shrink_hm_df(df):
+    df = df.drop('customer_id', axis=1)
+    return df
+
+
 class HMDataset(Dataset):
     def __init__(self, df, seq_len=16, num_article_ids=100, week_hist_max=5,
                  is_test=False):
@@ -124,6 +129,8 @@ TRAIN_WEEKS = [1, 2, 3, 4]
 SEQ_LEN = 16
 BATCH_SIZE = 256
 NUM_WORKERS = os.cpu_count()
+
+
 
 
 class HM(pl.LightningDataModule):
