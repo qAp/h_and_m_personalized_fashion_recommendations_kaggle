@@ -14,7 +14,7 @@ def calc_map(topk_preds, target_array, k=12):
         else:
             fp += 1
 
-    return np.sum(metric) / min(k, target_array.sum())
+    return np.sum(metric) / min(k, float(target_array.sum()))
 
 
 class MAP(nn.Module):
