@@ -223,6 +223,7 @@ class HM(pl.LightningDataModule):
                     f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
                 for w in self.val_weeks
                 ]).reset_index(drop=True)
+            hm_df = shrink_hm_df(hm_df)
 
             self.valid_ds = HMDataset(hm_df,
                                     self.seq_len,
@@ -235,6 +236,7 @@ class HM(pl.LightningDataModule):
                 f'{self.meta_data_dir}/hm_df_week{w}_hist_max{self.week_hist_max}.parquet')
             for w in self.train_weeks
             ]).reset_index(drop=True)
+        hm_df = shrink_hm_df(hm_df)
 
         self.train_ds = HMDataset(hm_df, 
                                   self.seq_len, 
@@ -244,6 +246,7 @@ class HM(pl.LightningDataModule):
         print('Creating test set...')
         df = pd.read_parquet(meta_data_path)
         hm_df = create_test_dataset(df, self.week_hist_max)
+        hm_df = shrink_hm_df(hm_df)
         self.test_ds = HMDataset(hm_df,
                                  self.seq_len,
                                  num_article_ids=len(le_article.classes_),
