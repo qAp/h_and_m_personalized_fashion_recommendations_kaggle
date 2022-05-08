@@ -27,11 +27,11 @@ class HM1Dataset(HMDataset):
 
         self.target = torch.randint(
             low=0, high=1 + 1,
-            size=(len(df), self.num_article_ids,)
+            size=(len(df), num_article_ids,)
             ).float()
 
         self.article_hist = torch.randint(
-            low=0, high=self.num_article_ids,
+            low=0, high=num_article_ids,
             size=(len(df), self.seq_len,)
             ).long()
 
