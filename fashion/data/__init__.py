@@ -1,1 +1,1 @@
-from .hm import HM
+from .hm import HM, TestHM
