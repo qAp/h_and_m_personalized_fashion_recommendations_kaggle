@@ -1,5 +1,6 @@
 
 import os
+import sys
 import gc
 import argparse
 import pathlib
@@ -76,6 +77,20 @@ def load_hm_df(parquet_path):
 def shrink_hm_df(df):
     df = df.drop('customer_id', axis=1)
     return df
+
+
+def check_reduced_size(df):
+    print('Before:', sys.getsizeof(df) / 1e9)
+
+    def _to_str(xs):
+        return ' '.join(str(x) for x in xs) if isinstance(xs, list) else ''
+
+#     df = df.drop('customer_id', axis=1)
+    df['target'] = df['target'].apply(_to_str)
+    df['article_id'] = df['article_id'].apply(_to_str)
+    df['week_history'] = df['week_history'].apply(_to_str)
+
+    print('After:', sys.getsizeof(df) / 1e9)
 
 
 class HMDataset(Dataset):
