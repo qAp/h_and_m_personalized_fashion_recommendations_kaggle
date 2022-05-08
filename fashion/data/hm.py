@@ -272,6 +272,40 @@ class HM(pl.LightningDataModule):
             )
 
 
+class TestHM(HM):
+    def __init__(self, args=None):
+        super().__init__(args)
+
+    def setup(self):
+        meta_data_path = f'{self.meta_data_dir}/train.parquet'
+        label_encoder_path = f'{self.meta_data_dir}/label_encoder'
+
+        print(f'Loading meta data at {meta_data_path}...')
+        df = pd.read_parquet(meta_data_path)
+        le_article = joblib.load(label_encoder_path)
+        self.le_article = le_article
+
+        print('Creating test set...')
+        df = pd.read_parquet(meta_data_path)
+        hm_df = create_test_dataset(df, self.week_hist_max)
+        hm_df = shrink_hm_df(hm_df)
+        self.test_ds = HMDataset(hm_df,
+                                self.seq_len,
+                                num_article_ids=len(le_article.classes_),
+                                week_hist_max=self.week_hist_max,
+                                is_test=True)
+
+    def test_dataloader(self):
+        return DataLoader(
+            self.test_ds,
+            batch_size=self.batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=self.num_workers,
+            pin_memory=self.on_gpu
+            )
+
+
 def prepare_data():
     parser = argparse.ArgumentParser()
 
