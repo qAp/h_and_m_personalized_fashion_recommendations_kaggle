@@ -19,19 +19,12 @@ from fashion.data.hm import (HMDataset, HM,
 class HM1Dataset(HMDataset):
     def __init__(self, df, seq_len=16, num_article_ids=100, week_hist_max=5,
                  is_test=False):
+
         df = df.reset_index(drop=True)
-
-        self.target = torch.randint(
-            low=0, high=1 + 1,
-            size=(len(df), num_article_ids,)
-            ).float()
-
-        self.article_hist = torch.randint(
-            low=0, high=num_article_ids,
-            size=(len(df), self.seq_len,)
-            ).long()
-
-        self.week_hist = torch.rand(len(df), self.seq_len).float()
+        self.week_history_list = list(df['week_history'])
+        self.article_id_list = list(df['article_id'])
+        self.week_list = list(df['week'])
+        self.target_list = list(df['target'])
 
         self.seq_len = seq_len
         self.num_article_ids = num_article_ids
@@ -39,9 +32,14 @@ class HM1Dataset(HMDataset):
         self.is_test = is_test
 
     def __len__(self):
-        return len(self.target)
+        return len(self.week_list)
 
     def __getitem__(self, index):
+
+        row_week_history = self.week_history_list[index]
+        row_article_id = self.article_id_list[index]
+        row_week = self.week_list[index]
+        row_target = self.target_list[index]
 
         if self.is_test:
             target = torch.zeros(2).float()
