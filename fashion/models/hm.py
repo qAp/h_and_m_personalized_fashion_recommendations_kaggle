@@ -36,8 +36,6 @@ class HMModel(nn.Module):
         x = x@F.normalize(self.article_emb.weight).T
 
         x, indices = x.max(axis=1)    # (N, num_class)
-        x = x.clamp(1e-3, 0.999)
-        x = -torch.log(1/x - 1)
 
         max_week = week_hist.gather(1, indices).unsqueeze(1)    # (N, 1, num_class)
 
