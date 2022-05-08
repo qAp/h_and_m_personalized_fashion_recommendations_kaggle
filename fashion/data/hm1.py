@@ -25,13 +25,25 @@ class HM1Dataset(HMDataset):
         self.week_values = df['week'].values
         self.target_values = df['target'].values
 
+        self.target = torch.randint(
+            low=0, high=1 + 1,
+            size=(len(df), self.num_article_ids,)
+            ).float()
+
+        self.article_hist = torch.randint(
+            low=0, high=self.num_article_ids,
+            size=(len(df), self.seq_len,)
+            ).long()
+
+        self.week_hist = torch.rand(len(df), self.seq_len).float()
+
         self.seq_len = seq_len
         self.num_article_ids = num_article_ids
         self.week_hist_max = week_hist_max
         self.is_test = is_test
 
     def __len__(self):
-        return len(self.week_history_values)
+        return len(self.target)
 
     def __getitem__(self, index):
 
