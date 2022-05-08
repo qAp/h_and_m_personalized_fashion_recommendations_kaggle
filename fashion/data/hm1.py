@@ -34,10 +34,6 @@ class HM1Dataset(HMDataset):
         return len(self.week_history_values)
 
     def __getitem__(self, index):
-        row_week_history = self.week_history_values[index]
-        row_article_id = self.article_id_values[index]
-        row_week = self.week_values[index]
-        row_target = self.target_values[index]
 
         if self.is_test:
             target = torch.zeros(2).float()
