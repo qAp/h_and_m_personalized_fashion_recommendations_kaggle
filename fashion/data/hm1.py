@@ -20,10 +20,6 @@ class HM1Dataset(HMDataset):
     def __init__(self, df, seq_len=16, num_article_ids=100, week_hist_max=5,
                  is_test=False):
         df = df.reset_index(drop=True)
-        self.week_history_values = df['week_history'].values
-        self.article_id_values = df['article_id'].values
-        self.week_values = df['week'].values
-        self.target_values = df['target'].values
 
         self.target = torch.randint(
             low=0, high=1 + 1,
