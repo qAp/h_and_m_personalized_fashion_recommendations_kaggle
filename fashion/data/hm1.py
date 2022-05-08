@@ -1,4 +1,5 @@
 
+
 import os
 import pathlib
 import gc
@@ -16,10 +17,27 @@ from fashion.data.hm import (HMDataset, HM,
 
 
 class HM1Dataset(HMDataset):
+    def __init__(self, df, seq_len=16, num_article_ids=100, week_hist_max=5,
+                 is_test=False):
+        df = df.reset_index(drop=True)
+        self.week_history_values = df['week_history'].values
+        self.article_id_values = df['article_id'].values
+        self.week_values = df['week'].values
+        self.target_values = df['target'].values
+
+        self.seq_len = seq_len
+        self.num_article_ids = num_article_ids
+        self.week_hist_max = week_hist_max
+        self.is_test = is_test
+
+    def __len__(self):
+        return len(self.df)
 
     def __getitem__(self, index):
-        self.seq_len
-        self.num_article_ids
+        row_week_history = self.week_history_values[index]
+        row_article_id = self.article_id_values[index]
+        row_week = self.week_values[index]
+        row_target = self.target_values[index]
 
         if self.is_test:
             target = torch.zeros(2).float()
