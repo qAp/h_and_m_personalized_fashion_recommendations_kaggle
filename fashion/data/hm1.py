@@ -31,7 +31,7 @@ class HM1Dataset(HMDataset):
         self.is_test = is_test
 
     def __len__(self):
-        return len(self.df)
+        return len(self.week_history_values)
 
     def __getitem__(self, index):
         row_week_history = self.week_history_values[index]
