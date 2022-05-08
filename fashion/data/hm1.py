@@ -48,22 +48,22 @@ class HM1Dataset(HMDataset):
             for t in row_target:
                 target[t] = 1.
 
-        article_hist = torch.zeros(self.seq_len).long()
+        article_hist = torch.zeros(self.seq_len).int()
         week_hist = torch.ones(self.seq_len).float()
 
         if isinstance(row_article_id, (list, np.ndarray)):
 
             if len(row_article_id) >= self.seq_len:
-                article_hist = torch.LongTensor(row_article_id[-self.seq_len:])
+                article_hist = torch.tensor(row_article_id[-self.seq_len:]).int()
                 week_hist = (
-                    (torch.LongTensor(
-                        row_week_history[-self.seq_len:]) - row_week)
+                    (torch.tensor(row_week_history[-self.seq_len:]).float() 
+                     - row_week)
                     / self.week_hist_max / 2
                 )
             else:
-                article_hist[-len(row_article_id):] = torch.LongTensor(row_article_id)  
+                article_hist[-len(row_article_id):] = torch.tensor(row_article_id).int()
                 week_hist[-len(row_article_id):] = (
-                    (torch.LongTensor(row_week_history) - row_week)
+                    (torch.tensor(row_week_history).float() - row_week)
                     / self.week_hist_max / 2
                 )
 
