@@ -44,14 +44,28 @@ class HM1Dataset(HMDataset):
         if self.is_test:
             target = torch.zeros(2).float()
         else:
-            target = torch.randint(low=0, high=1 + 1, 
-                                   size=(self.num_article_ids,)
-                                   ).float()
+            target = torch.zeros(self.num_article_ids).float()
+            for t in row_target:
+                target[t] = 1.
 
-        article_hist = torch.randint(low=0, high=self.num_article_ids,
-                                     size=(self.seq_len,)
-                                     ).long()
-        week_hist = torch.rand(self.seq_len).float()
+        article_hist = torch.zeros(self.seq_len).long()
+        week_hist = torch.ones(self.seq_len).float()
+
+        if isinstance(row_article_id, (list, np.ndarray)):
+
+            if len(row_article_id) >= self.seq_len:
+                article_hist = torch.LongTensor(row_article_id[-self.seq_len:])
+                week_hist = (
+                    (torch.LongTensor(
+                        row_week_history[-self.seq_len:]) - row_week)
+                    / self.week_hist_max / 2
+                )
+            else:
+                article_hist[-len(row_article_id):] = torch.LongTensor(row_article_id)  
+                week_hist[-len(row_article_id):] = (
+                    (torch.LongTensor(row_week_history) - row_week)
+                    / self.week_hist_max / 2
+                )
 
         return article_hist, week_hist, target
 
