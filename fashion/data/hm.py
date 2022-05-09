@@ -143,7 +143,7 @@ VAL_WEEKS = [0]
 TRAIN_WEEKS = [1, 2, 3, 4]
 SEQ_LEN = 16
 BATCH_SIZE = 256
-NUM_WORKERS = os.cpu_count()
+NUM_WORKERS = 0
 
 
 
