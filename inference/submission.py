@@ -8,8 +8,7 @@ import albumentations as albu
 import pytorch_lightning as pl
 
 from fashion.config import *
-from fashion.utils import import_class
-from training.run_experiment import setup_parser
+from fashion.utils import import_class, setup_parser
 
 
 def main():
