@@ -21,7 +21,7 @@ def setup_parser():
     _add('--load_from_checkpoint', type=str, default=None)
     _add('--wandb', action='store_true', default=False)
 
-    args, _ = parser.parse_known_args([])
+    args, _ = parser.parse_known_args()
 
     data_class = import_class(f'fashion.data.{args.data_class}')
     data_group = parser.add_argument_group('Data Args')
